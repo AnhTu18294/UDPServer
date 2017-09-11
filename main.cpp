@@ -4,10 +4,16 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <string.h>
+#include <sys/time.h>
+#include <fcntl.h>
+#include "timeduration.h"
+#include <unistd.h>
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
+
     cout << "Server 1: " << endl;
     int sockFD, port;
     socklen_t client;
@@ -40,6 +46,10 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    long sum;
+
+    struct timeval timeout={0,500000};
+    setsockopt(sockFD,SOL_SOCKET, SO_RCVTIMEO,(char*)&timeout,sizeof(struct timeval));
     listen(sockFD, 5);
     client = (socklen_t) sizeof(cli_addr);
     while(true){
@@ -49,11 +59,25 @@ int main(int argc, char *argv[])
         }else{
             cout << "server has been received messaage: " << buffer << endl;
         }
+//        sum = 0;
+//        TimeDuration time;
+//        time.start();
+//        for(int i = 0; i < 1000; i++){
+//            for(int j = 0; j < 1000; j++){
+//                for(int q = 0; q < 1000; q++){
+//                    sum += (i * j + q);
+//                }
+//            }
+//        }
+//        time.end();
+//        std::cout << "SUM = " << sum << std::endl;
+//        time.printDuration();
         char *replyMessage = "reply message";
         int rp = sendto(sockFD, replyMessage, strlen(replyMessage), 0, (struct sockaddr *)&cli_addr, client);
         if(rp < 0){
             printf("ERROR: Cannot writting to socket");
         }
+        usleep(1000);
     }
     return 0;
 }
